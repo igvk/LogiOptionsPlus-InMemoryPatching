@@ -1,0 +1,4 @@
+; Smooth scrolling wheel apps filenames list: %APPDATA%\logioptionsplus\wheel_apps_list.txt
+; (shell wildcards '*', '?' can be used, '-' at line start means exclusion, ';' is comment line)
+logioptionsplus.exe
+winword.exe
