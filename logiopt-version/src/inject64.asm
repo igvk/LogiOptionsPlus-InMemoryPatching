@@ -12,7 +12,7 @@ original_jump_address dq 0
 ; original_jump_address should be set beforehand to the return code address
 
 injected_handler_V100 proc
-    ; Not saving registers in stack, due to not reqired by the patched code
+    ; Not saving registers in stack, due to not required by the patched code
     ; This means that we can follow x64 calling convention without modifying stack
     ;push rcx
     ;push rdx
@@ -41,8 +41,7 @@ injected_handler_V100 proc
 injected_handler_V100 endp
 
 injected_handler_V146 proc
-    ; Not saving registers in stack, due to not reqired by the patched code
-    ; This means that we can follow x64 calling convention without modifying stack
+    ; Not saving registers in stack, due to not required by the patched code
     lea rcx, [rbp+57h-58h]
     cmp r14, 10h
     cmovnb rcx, rsi ; name
@@ -55,8 +54,7 @@ injected_handler_V146 proc
 injected_handler_V146 endp
 
 injected_handler_V168 proc
-    ; Not saving registers in stack, due to not reqired by the patched code
-    ; This means that we can follow x64 calling convention without modifying stack
+    ; Not saving registers in stack, due to not required by the patched code
     lea rcx, [rbp+57h-78h]
     cmp r14, 10h
     cmovnb rcx, rdi ; name
