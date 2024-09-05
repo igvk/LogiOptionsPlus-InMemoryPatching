@@ -6,3 +6,11 @@ To enable high-resolution mode for the mouse wheel, you need to:
 2. Create a text file called `wheel_apps_list.txt` in `%AppData%\logioptionsplus` (for example, `C:\Users\User\AppData\Roaming\logioptionsplus\wheel_apps_list.txt`). In this file, list the programs (without paths) in which to allow the functionality, one per line. You can use the `*` and `?` symbols, and a line starting with a minus sign (`-`) will exclude a program from the list.
 3. Restart the Logi Options+ Agent background program (for example, you can do this via Task Manager by closing all `logioptionsplus_*` processes, and they will restart automatically).
 4. When Logi Options+ is updated, the file `version.dll` is deleted by the installer, so you will need to place it back into the program folder again.
+
+Example of ``wheel_apps_list.txt``:
+``` 
+notepad*
+winword.exe
+excel.exe
+-iexplore.exe
+``` 
