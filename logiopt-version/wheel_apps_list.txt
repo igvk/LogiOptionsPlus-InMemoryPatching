@@ -1,4 +1,22 @@
 ; Smooth scrolling wheel apps filenames list: %APPDATA%\logioptionsplus\wheel_apps_list.txt
 ; (shell wildcards '*', '?' can be used, '-' at line start means exclusion, ';' is comment line)
 logioptionsplus.exe
+explorer.exe
+SystemSettings.exe
+notepad.exe
 winword.exe
+excel.exe
+vivaldi.exe
+Skype.exe
+telegram.exe
+discord.exe
+Signal.exe
+Acrobat*
+FoxitPDFEditor*
+Photoshop.exe
+SystemInformer.exe
+devenv.exe
+code.exe
+GitHubDesktop.exe
+; Steam
+steamwebhelper.exe
