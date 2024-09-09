@@ -26,4 +26,4 @@ excel.exe
 -iexplore.exe
 ``` 
 
-[Sample list of apps in source tree](tree/main/logiopt-version/wheel_apps_list.txt)
+[Sample list of apps in source tree](logiopt-version/wheel_apps_list.txt)
