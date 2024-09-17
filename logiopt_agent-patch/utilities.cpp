@@ -1,4 +1,5 @@
 #include <cctype>
+#include "utilities.hpp"
 
 // returns TRUE if text string matches glob-like pattern with * and ?
 // glob string should be in lowercase
@@ -33,5 +34,5 @@ bool glob_match(const char* text, const char* glob)
     while (*glob == '*')
         glob++;
     // at end of text means success if nothing else is left to match
-    return *glob == '\0' ? true : false;
+    return *glob == '\0';
 }
