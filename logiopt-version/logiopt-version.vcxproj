@@ -133,6 +133,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>-d2:-FH4- /emittoolversioninfo:no /pdbaltpath:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <MASM>
+      <PreprocessorDefinitions>DEBUG</PreprocessorDefinitions>
+    </MASM>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -150,6 +153,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalOptions>-d2:-FH4- /emittoolversioninfo:no /pdbaltpath:%_PDB% %(AdditionalOptions)</AdditionalOptions>
     </Link>
+    <MASM>
+      <PreprocessorDefinitions>DEBUG</PreprocessorDefinitions>
+    </MASM>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

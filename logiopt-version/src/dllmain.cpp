@@ -214,22 +214,22 @@ namespace
             GetSystemDirectoryW(systemDirectory, std::size(systemDirectory));
         else
             GetSystemWow64DirectoryW(systemDirectory, std::size(systemDirectory));
-        DEBUG_TRACE(L"init : systemDirectory=[%s]", systemDirectory);
+        DEBUG_TRACE(L"init : systemDirectory=\"%s\"", systemDirectory);
 
         {
             wchar_t moduleFullpathFilename[MAX_PATH + 1];
             GetModuleFileNameW(hModule, moduleFullpathFilename, std::size(moduleFullpathFilename));
-            DEBUG_TRACE(L"init : moduleFullpathFilename=[%s]", moduleFullpathFilename);
+            DEBUG_TRACE(L"init : moduleFullpathFilename=\"%s\"", moduleFullpathFilename);
 
             wchar_t fname[_MAX_FNAME + 1];
             wchar_t drive[_MAX_DRIVE + 1];
             wchar_t dir[_MAX_DIR + 1];
             wchar_t ext[_MAX_EXT + 1];
             _wsplitpath_s(moduleFullpathFilename, drive, dir, fname, ext);
-            DEBUG_TRACE(L"init : fname=[%s]", fname);
+            DEBUG_TRACE(L"init : fname=\"%s\"", fname);
 
             dllType = determineDllType(fname);
-            DEBUG_TRACE(L"init : dllType=[%d]", dllType);
+            DEBUG_TRACE(L"init : dllType=%d", dllType);
         }
 
         loadGenuineDll(dllType, systemDirectory);

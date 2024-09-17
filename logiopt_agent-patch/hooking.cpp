@@ -8,17 +8,21 @@ void* AllocatePageNearAddress(void* targetAddr)
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
     const uint64_t PAGE_SIZE = sysInfo.dwPageSize;
+    constexpr uint64_t maxDisp = 0x7FFFFF00;
 
-    uint64_t startAddr = reinterpret_cast<uint64_t>(targetAddr) & ~(PAGE_SIZE - 1); //round down to nearest page boundary
-    uint64_t minAddr = min(startAddr - 0x7FFFFF00, (uint64_t)sysInfo.lpMinimumApplicationAddress);
-    uint64_t maxAddr = max(startAddr + 0x7FFFFF00, (uint64_t)sysInfo.lpMaximumApplicationAddress);
-    uint64_t startPage = startAddr - startAddr % PAGE_SIZE;
+    uint64_t startPage = reinterpret_cast<uint64_t>(targetAddr) & ~(PAGE_SIZE - 1); //round down to nearest page boundary
+    uint64_t minAddr = reinterpret_cast<uint64_t>(sysInfo.lpMinimumApplicationAddress);
+    uint64_t addr = startPage > maxDisp ? startPage - maxDisp : 0;
+    minAddr = addr >= minAddr ? addr : minAddr;
+    uint64_t maxAddr = reinterpret_cast<uint64_t>(sysInfo.lpMaximumApplicationAddress);
+    addr = startPage < UINT64_MAX - maxDisp ? startPage + maxDisp : UINT64_MAX;
+    maxAddr = addr <= maxAddr ? addr : maxAddr;
     uint64_t byteOffset = PAGE_SIZE;
     uint64_t highAddr, lowAddr;
 
     do
     {
-        highAddr = startPage + byteOffset;
+        highAddr = startPage < UINT64_MAX - byteOffset ? startPage + byteOffset : UINT64_MAX;
         lowAddr = startPage > byteOffset ? startPage - byteOffset : 0;
         if (highAddr < maxAddr)
         {
@@ -33,7 +37,7 @@ void* AllocatePageNearAddress(void* targetAddr)
                 return outAddr;
         }
         byteOffset += PAGE_SIZE;
-    } while (highAddr <= maxAddr || lowAddr >= minAddr);
+    } while (highAddr < maxAddr || lowAddr > minAddr);
 
     return nullptr;
 }
@@ -72,7 +76,10 @@ bool InstallCaveHook(void* func2hook, size_t injectSize, void* caveRelayMemory, 
     code += sizeof jmpInstruction;
     *code = shortDisp;
     code += sizeof shortDisp;
-    //*reinterpret_cast<uint16_t*>(code) = 0x9090; // add 2 nop-s
+
+    injectSize -= sizeof jmpInstruction + sizeof shortDisp;
+    if (injectSize > 0)
+        memset(code, 0x90, injectSize);
 
     return true;
 }

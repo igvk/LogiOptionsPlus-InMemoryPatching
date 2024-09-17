@@ -42,6 +42,7 @@ injected_handler_V100 endp
 
 injected_handler_V146 proc
     ; Not saving registers in stack, due to not required by the patched code
+    ; Shadow space of the target function may be used in the callee
     lea rcx, [rbp+57h-58h]
     cmp r14, 10h
     cmovnb rcx, rsi ; name
@@ -55,6 +56,7 @@ injected_handler_V146 endp
 
 injected_handler_V168 proc
     ; Not saving registers in stack, due to not required by the patched code
+    ; Shadow space of the target function may be used in the callee
     lea rcx, [rbp+57h-78h]
     cmp r14, 10h
     cmovnb rcx, rdi ; name
