@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <intrin.h>
 #include <windows.h>
 #include "common.hpp"
 #include "hooking.hpp"
@@ -7,23 +8,23 @@ void* AllocatePageNearAddress(void* targetAddr)
 {
     SYSTEM_INFO sysInfo;
     GetSystemInfo(&sysInfo);
-    const uint64_t PAGE_SIZE = sysInfo.dwPageSize;
-    constexpr uint64_t maxDisp = 0x7FFFFF00;
+    const size_t PAGE_SIZE = sysInfo.dwPageSize;
+    constexpr size_t maxDisp = 0x7FFFFF00;
 
-    uint64_t startPage = reinterpret_cast<uint64_t>(targetAddr) & ~(PAGE_SIZE - 1); //round down to nearest page boundary
-    uint64_t minAddr = reinterpret_cast<uint64_t>(sysInfo.lpMinimumApplicationAddress);
-    uint64_t addr = startPage > maxDisp ? startPage - maxDisp : 0;
+    uintptr_t startPage = reinterpret_cast<uintptr_t>(targetAddr) & ~(PAGE_SIZE - 1); //round down to nearest page boundary
+    uintptr_t minAddr = reinterpret_cast<uintptr_t>(sysInfo.lpMinimumApplicationAddress);
+    uintptr_t addr = _sat_sub_u64(startPage, maxDisp); // addr is decremented by maxDisp, but not wrapped around zero
     minAddr = addr >= minAddr ? addr : minAddr;
-    uint64_t maxAddr = reinterpret_cast<uint64_t>(sysInfo.lpMaximumApplicationAddress);
-    addr = startPage < UINT64_MAX - maxDisp ? startPage + maxDisp : UINT64_MAX;
+    uintptr_t maxAddr = reinterpret_cast<uintptr_t>(sysInfo.lpMaximumApplicationAddress);
+    addr = _sat_add_u64(startPage, maxDisp); // addr is incremented by maxDisp, but not wrapped around zero
     maxAddr = addr <= maxAddr ? addr : maxAddr;
-    uint64_t byteOffset = PAGE_SIZE;
-    uint64_t highAddr, lowAddr;
+    const size_t addrStep = PAGE_SIZE;
+    uintptr_t highAddr = startPage, lowAddr = startPage;
 
     do
     {
-        highAddr = startPage < UINT64_MAX - byteOffset ? startPage + byteOffset : UINT64_MAX;
-        lowAddr = startPage > byteOffset ? startPage - byteOffset : 0;
+        highAddr = _sat_add_u64(highAddr, addrStep); // highAddr is incremented by addrStep, but is limited to UINT64_MAX from above
+        lowAddr = _sat_sub_u64(lowAddr, addrStep); // lowAddr is decremented by addrStep, but is limited to 0 from below
         if (highAddr < maxAddr)
         {
             void* outAddr = VirtualAlloc(reinterpret_cast<void*>(highAddr), PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);  // NOLINT(performance-no-int-to-ptr)
@@ -36,7 +37,6 @@ void* AllocatePageNearAddress(void* targetAddr)
             if (outAddr != nullptr)
                 return outAddr;
         }
-        byteOffset += PAGE_SIZE;
     } while (highAddr < maxAddr || lowAddr > minAddr);
 
     return nullptr;
