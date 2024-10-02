@@ -34,7 +34,7 @@ void* AllocatePageNearAddress(void* targetAddr)
         if (lowAddr > minAddr)
         {
             void* outAddr = VirtualAlloc(reinterpret_cast<void*>(lowAddr), PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);  // NOLINT(performance-no-int-to-ptr)
-            if (outAddr != nullptr)
+            if (outAddr)
                 return outAddr;
         }
     } while (highAddr < maxAddr || lowAddr > minAddr);
