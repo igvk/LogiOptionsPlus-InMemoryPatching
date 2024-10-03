@@ -23,8 +23,8 @@ void* AllocatePageNearAddress(void* targetAddr)
 
     do
     {
-        highAddr = _sat_add_u64(highAddr, addrStep); // highAddr is incremented by addrStep, but is limited to UINT64_MAX from above
-        lowAddr = _sat_sub_u64(lowAddr, addrStep); // lowAddr is decremented by addrStep, but is limited to 0 from below
+        highAddr = _sat_add_u64(highAddr, addrStep); // highAddr is incremented by addrStep, but is bounded above by UINT64_MAX
+        lowAddr = _sat_sub_u64(lowAddr, addrStep); // lowAddr is decremented by addrStep, but is bounded below by 0
         if (highAddr < maxAddr)
         {
             void* outAddr = VirtualAlloc(reinterpret_cast<void*>(highAddr), PAGE_SIZE, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);  // NOLINT(performance-no-int-to-ptr)
