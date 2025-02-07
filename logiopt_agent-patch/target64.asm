@@ -136,12 +136,12 @@ target_handler_V186 proc
     push rdi
     push r12
     push r14
-    lea rbp, [rsp-27h]
-    sub rsp, 0B0h
+    lea rbp, [rsp-10h]
+    sub rsp, 110h
     mov rdi, rcx ; name
     mov rbx, rdx ; length
     mov r12, rsp
-    mov [rbp+57h-78h], rcx
+    mov [rbp+40h-80h], rcx
     mov r14, 10h
     lea rcx, [rbp+40h-80h]
     cmp r14, 10h
