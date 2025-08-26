@@ -82,4 +82,18 @@ injected_handler_V186 proc
     jmp [original_jump_address]
 injected_handler_V186 endp
 
+injected_handler_V194 proc
+    ; Not saving registers in stack, due to not required by the patched code
+    ; Shadow space of the target function may be used in the callee
+    lea rcx, [rbp+70h-70h]
+    cmp rsi, 0Fh
+    cmova rcx, rdi ; name
+    mov rdx, rbx ; length
+    movzx r8, al ; previous check
+    call patched_switch_foreground_process_handler
+    mov [r15+28h], al
+    mov rdi, [r15+8h]
+    jmp [original_jump_address]
+injected_handler_V194 endp
+
 end

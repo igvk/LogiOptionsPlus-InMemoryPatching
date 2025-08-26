@@ -29,9 +29,6 @@
     <MASM Include="inject64.asm">
       <Filter>Source Files</Filter>
     </MASM>
-    <MASM Include="inject32.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
     <MASM Include="target64.asm">
       <Filter>Source Files</Filter>
     </MASM>

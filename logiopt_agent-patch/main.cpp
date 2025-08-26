@@ -23,6 +23,7 @@
 #define TARGET_MACHINE_CODE_V146 0x48, 0x8D, 0x4D, 0xFF, 0x49, 0x83, 0xFE, 0x10, 0x48, 0x0F, 0x43, 0xCE, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
 #define TARGET_MACHINE_CODE_V168 0x48, 0x8D, 0x4D, 0xDF, 0x49, 0x83, 0xFE, 0x10, 0x48, 0x0F, 0x43, 0xCF, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
 #define TARGET_MACHINE_CODE_V186 0x48, 0x8D, 0x4D, 0xC0, 0x49, 0x83, 0xFE, 0x10, 0x48, 0x0F, 0x43, 0xCF, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
+#define TARGET_MACHINE_CODE_V194 0x48, 0x8D, 0x4D, 0x00, 0x48, 0x83, 0xFE, 0x0F, 0x48, 0x0F, 0x47, 0xCF, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
 #define PATCH_MACHINE_CODE 0x32, 0xC0
 #define REPLACEMENT_MACHINE_CODE 0xB0, 0x01
 // HOOK_MACHINE_CODE is the byte sequence of code to be replaced by injected code that is close to and after the found target code
@@ -31,6 +32,7 @@
 #define HOOK_MACHINE_CODE_V146 0x41, 0x88, 0x44, 0x24, 0x28, 0x4D, 0x8B, 0x64, 0x24, 0x08
 #define HOOK_MACHINE_CODE_V168 0x41, 0x88, 0x44, 0x24, 0x28, 0x4D, 0x8B, 0x64, 0x24, 0x08
 #define HOOK_MACHINE_CODE_V186 0x41, 0x88, 0x44, 0x24, 0x28, 0x4D, 0x8B, 0x64, 0x24, 0x08
+#define HOOK_MACHINE_CODE_V194 0x41, 0x88, 0x47, 0x28, 0x49, 0x8B, 0x7F, 0x08
 //#define CAVE_MACHINE_CODE_V100 0x5D, 0xC3, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC // 13 bytes minimum (after displacement)
 //#define CAVE_MACHINE_CODE_DISP_V100 2
 #define MAX_PATCH_CODE_DISP 0x20
@@ -49,12 +51,14 @@ constexpr byte logioptions_target_code_V100[] = { TARGET_MACHINE_CODE_V100 };
 constexpr byte logioptions_target_code_V146[] = { TARGET_MACHINE_CODE_V146 };
 constexpr byte logioptions_target_code_V168[] = { TARGET_MACHINE_CODE_V168 };
 constexpr byte logioptions_target_code_V186[] = { TARGET_MACHINE_CODE_V186 };
+constexpr byte logioptions_target_code_V194[] = { TARGET_MACHINE_CODE_V194 };
 constexpr byte logioptions_hook_code_V100[] = { HOOK_MACHINE_CODE_V100 };
 constexpr byte logioptions_hook_code_V146[] = { HOOK_MACHINE_CODE_V146 };
 constexpr byte logioptions_hook_code_V168[] = { HOOK_MACHINE_CODE_V168 };
 constexpr byte logioptions_hook_code_V186[] = { HOOK_MACHINE_CODE_V186 };
-const byte *logioptions_target_code = logioptions_target_code_V186;
-const byte *logioptions_hook_code = logioptions_hook_code_V186;
+constexpr byte logioptions_hook_code_V194[] = { HOOK_MACHINE_CODE_V194 };
+const byte *logioptions_target_code = logioptions_target_code_V194;
+const byte *logioptions_hook_code = logioptions_hook_code_V194;
 #ifdef CODE_CAVE
 //constexpr byte logioptions_cave_code_V100[] = { CAVE_MACHINE_CODE_V100 };
 //constexpr size_t logioptions_cave_code_disp_V100 = CAVE_MACHINE_CODE_DISP_V100;
@@ -72,11 +76,13 @@ extern "C"
     extern bool target_handler_V146(const char* name, size_t length);
     extern bool target_handler_V168(const char* name, size_t length);
     extern bool target_handler_V186(const char* name, size_t length);
+    extern bool target_handler_V194(const char* name, size_t length);
 
     extern void injected_handler_V100();
     extern void injected_handler_V146();
     extern void injected_handler_V168();
     extern void injected_handler_V186();
+    extern void injected_handler_V194();
 
     bool patched_switch_foreground_process_handler(const char* name, size_t length, bool previous_check)
     {
@@ -373,7 +379,13 @@ void hook_current_process()
                     size_t target_code_size, hook_code_size;
                     void (*injected_handler)();
                     byte* found_addr;
-                    if (find_data(memory, bytes_count, logioptions_target_code_V186, target_code_size = sizeof logioptions_target_code_V186, found_addr))
+                    if (find_data(memory, bytes_count, logioptions_target_code_V194, target_code_size = sizeof logioptions_target_code_V194, found_addr))
+                    {
+                        injected_handler = injected_handler_V194;
+                        hook_code = logioptions_hook_code_V194;
+                        hook_code_size = sizeof logioptions_hook_code_V194;
+                    }
+                    else if (find_data(memory, bytes_count, logioptions_target_code_V186, target_code_size = sizeof logioptions_target_code_V186, found_addr))
                     {
                         injected_handler = injected_handler_V186;
                         hook_code = logioptions_hook_code_V186;
@@ -465,7 +477,7 @@ int main()
     //patch_another_process();
     read_config();
     hook_current_process();
-    const bool result = target_handler_V186(PROGRAM_NAME_CHARS, sizeof PROGRAM_NAME_CHARS);
+    const bool result = target_handler_V194(PROGRAM_NAME_CHARS, sizeof PROGRAM_NAME_CHARS);
     std::cout << "Handler result = " << static_cast<int>(result) << '\n';
     return 0;
 }
