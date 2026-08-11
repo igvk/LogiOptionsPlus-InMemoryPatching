@@ -213,4 +213,45 @@ return:
     db 12 dup(0cch)
 target_handler_V194 endp
 
+target_handler_V206 proc
+    push rbp
+    push rbx
+    push rsi
+    push rdi
+    push r14
+    lea rbp, [rsp-90h]
+    sub rsp, 190h
+    mov r14, rsp
+    mov rdi, rcx ; name
+    mov rbx, rdx ; length
+    mov [rbp+0B0h-70h], rcx
+    mov rsi, 10h
+    lea rcx, [rbp+0B0h-70h]
+    cmp rsi, 0Fh
+    cmova rcx, rdi
+    cmp rbx, sizeof firefox_exe - 1
+    jnz notfound
+    mov r8, rbx
+    lea rdx, [firefox_exe]
+    call memcmp
+    test eax, eax
+    jz notfound
+found:
+    mov al, 1
+    jmp return
+notfound:
+    xor al, al
+return:
+    mov [r14+28h], al
+    mov rdi, [r14+8h]
+    add rsp, 190h
+    pop r14
+    pop rdi
+    pop rsi
+    pop rbx
+    pop rbp
+    ret
+    db 12 dup(0cch)
+target_handler_V206 endp
+
 end

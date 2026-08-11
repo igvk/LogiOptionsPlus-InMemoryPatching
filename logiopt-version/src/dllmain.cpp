@@ -26,6 +26,7 @@
 #define TARGET_MACHINE_CODE_V168 0x48, 0x8D, 0x4D, 0xDF, 0x49, 0x83, 0xFE, 0x10, 0x48, 0x0F, 0x43, 0xCF, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
 #define TARGET_MACHINE_CODE_V186 0x48, 0x8D, 0x4D, 0xC0, 0x49, 0x83, 0xFE, 0x10, 0x48, 0x0F, 0x43, 0xCF, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
 #define TARGET_MACHINE_CODE_V194 0x48, 0x8D, 0x4D, 0x00, 0x48, 0x83, 0xFE, 0x0F, 0x48, 0x0F, 0x47, 0xCF, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
+#define TARGET_MACHINE_CODE_V206 0x48, 0x8D, 0x4D, 0x40, 0x48, 0x83, 0xFE, 0x0F, 0x48, 0x0F, 0x47, 0xCF, 0x48, 0x83, 0xFB, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC3
 // HOOK_MACHINE_CODE is the byte sequence of code to be replaced by injected code that is close to and after the found target code
 // (5 bytes minimum)
 #define HOOK_MACHINE_CODE_V100 0x88, 0x45, 0x28, 0x48, 0x8B, 0x7D, 0x08
@@ -33,6 +34,7 @@
 #define HOOK_MACHINE_CODE_V168 0x41, 0x88, 0x44, 0x24, 0x28, 0x4D, 0x8B, 0x64, 0x24, 0x08
 #define HOOK_MACHINE_CODE_V186 0x41, 0x88, 0x44, 0x24, 0x28, 0x4D, 0x8B, 0x64, 0x24, 0x08
 #define HOOK_MACHINE_CODE_V194 0x41, 0x88, 0x47, 0x28, 0x49, 0x8B, 0x7F, 0x08
+#define HOOK_MACHINE_CODE_V206 0x41, 0x88, 0x46, 0x28, 0x49, 0x8B, 0x7E, 0x08
 #define MAX_PATCH_CODE_DISP 0x20
 #else
 #define TARGET_MACHINE_CODE 0x48, 0x8D, 0x4C, 0x24, 0x78, 0x48, 0x83, 0xFF, 0x10, 0x48, 0x0F, 0x43, 0xCB, 0x48, 0x83, 0xFE, 0x0B, 0x75, 0x17, 0x4C, 0x8B, 0xC6
@@ -46,11 +48,13 @@ constexpr byte logioptions_target_code_V146[] = { TARGET_MACHINE_CODE_V146 };
 constexpr byte logioptions_target_code_V168[] = { TARGET_MACHINE_CODE_V168 };
 constexpr byte logioptions_target_code_V186[] = { TARGET_MACHINE_CODE_V186 };
 constexpr byte logioptions_target_code_V194[] = { TARGET_MACHINE_CODE_V194 };
+constexpr byte logioptions_target_code_V206[] = { TARGET_MACHINE_CODE_V206 };
 constexpr byte logioptions_hook_code_V100[] = { HOOK_MACHINE_CODE_V100 };
 constexpr byte logioptions_hook_code_V146[] = { HOOK_MACHINE_CODE_V146 };
 constexpr byte logioptions_hook_code_V168[] = { HOOK_MACHINE_CODE_V168 };
 constexpr byte logioptions_hook_code_V186[] = { HOOK_MACHINE_CODE_V186 };
 constexpr byte logioptions_hook_code_V194[] = { HOOK_MACHINE_CODE_V194 };
+constexpr byte logioptions_hook_code_V206[] = { HOOK_MACHINE_CODE_V206 };
 constexpr long code_memory_protection = PAGE_EXECUTE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
 
 std::vector<std::string> enabled_names;
@@ -65,6 +69,7 @@ extern "C"
     extern void injected_handler_V168();
     extern void injected_handler_V186();
     extern void injected_handler_V194();
+    extern void injected_handler_V206();
 
     bool patched_switch_foreground_process_handler(const char* name, size_t length, bool previous_check)
     {
@@ -258,12 +263,15 @@ namespace
             {
                 read_config();
 
+                bool found = false;
+
                 MEMORY_BASIC_INFORMATION mbi;
 
                 for (byte* addr = nullptr; VirtualQuery(addr, &mbi, sizeof mbi); addr += mbi.RegionSize)
                 {
                     if (mbi.State == MEM_COMMIT && mbi.Protect != PAGE_NOACCESS && (mbi.Protect & code_memory_protection) != 0)
                     {
+                        DEBUG_TRACE("Address: %p (Protect: %lx)", addr, mbi.Protect);
                         byte* memory = static_cast<byte*>(mbi.BaseAddress);
                         const size_t bytes_count = mbi.RegionSize;
 
@@ -271,7 +279,13 @@ namespace
                         size_t target_code_size, hook_code_size;
                         void (*injected_handler)();
                         byte* found_addr;
-                        if (find_data(memory, bytes_count, logioptions_target_code_V194, target_code_size = sizeof logioptions_target_code_V194, found_addr))
+                        if (find_data(memory, bytes_count, logioptions_target_code_V206, target_code_size = sizeof logioptions_target_code_V206, found_addr))
+                        {
+                            injected_handler = injected_handler_V206;
+                            hook_code = logioptions_hook_code_V206;
+                            hook_code_size = sizeof logioptions_hook_code_V206;
+                        }
+                        else if (find_data(memory, bytes_count, logioptions_target_code_V194, target_code_size = sizeof logioptions_target_code_V194, found_addr))
                         {
                             injected_handler = injected_handler_V194;
                             hook_code = logioptions_hook_code_V194;
@@ -304,6 +318,7 @@ namespace
                         else
                             continue;
 
+                        found = true;
                         DEBUG_TRACE("Found pattern at %p", found_addr);
                         found_addr += target_code_size;
                         size_t count = bytes_count - (found_addr - memory);
@@ -334,6 +349,16 @@ namespace
                         }
                         break;
                     }
+                    /*
+                    else
+                    {
+                        DEBUG_TRACE("Skipping address: %p (Protect: %lx)", addr, mbi.Protect);
+                    }
+                    */
+                }
+                if (!found)
+                {
+                    DEBUG_TRACE("Code pattern not found");
                 }
             }
         }
